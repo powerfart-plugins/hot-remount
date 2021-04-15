@@ -1,5 +1,5 @@
 const { Plugin } = require('powercord/entities');
-const { watch } = require('fs');
+const watch = require('node-watch'); // from powercord/package-lock.json
 
 module.exports = class HotRemount extends Plugin {
   async startPlugin () {
