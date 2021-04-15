@@ -1,0 +1,7 @@
+{
+  "name": "Hot remount",
+  "description": "New command to track changes in the plugin and automatic remount it",
+  "author": "Xinos",
+  "version": "1.0.0",
+  "license": "MIT"
+}
