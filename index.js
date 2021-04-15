@@ -20,7 +20,7 @@ module.exports = class HotRemount extends Plugin {
       command: 'watch',
       label: 'Hot remount',
       usage: '{c} < plugin-id >',
-      description: 'Track changes in the plugin and automatic remount it',
+      description: 'Track changes in a plugin and automatically remount it',
       executor: this.run.bind(this),
       autocomplete: this.autocomplete.bind(this)
     });
@@ -29,7 +29,7 @@ module.exports = class HotRemount extends Plugin {
   run ([ id ]) {
     if (powercord.pluginManager.plugins.has(id)) {
       if (this.settings.get('plugins', []).includes(id)) {
-        return { result: 'Already watched' };
+        return { result: 'Already watching' };
       }
       this.watch.start(id);
       return false;
@@ -73,7 +73,7 @@ module.exports = class HotRemount extends Plugin {
 
   notice (id, name, onClick) {
     powercord.api.notices.sendAnnouncement(`hot-remount-stop-${id}`, {
-      message: `Watch the plugin "${name}"`,
+      message: `Watching the plugin "${name}"`,
       button: {
         text: 'Stop',
         onClick
