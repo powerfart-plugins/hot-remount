@@ -12,7 +12,7 @@ module.exports = class HotRemount extends Plugin {
   }
 
   onLoaded () {
-    this.settings.get('plugins', []).forEach((id) => this.watch.start(id));
+    this.settings.get('plugins', []).forEach((id) => this.startWatch(id));
   }
 
   registerCommand () {
@@ -31,7 +31,11 @@ module.exports = class HotRemount extends Plugin {
       if (this.settings.get('plugins', []).includes(id)) {
         return { result: 'Already watching' };
       }
-      this.watch.start(id);
+      this.settings.set('plugins', [
+        ...this.settings.get('plugins', []),
+        id
+      ]);
+      this.startWatch(id);
       return false;
     }
     return { result: 'Plugin not found' };
@@ -49,26 +53,19 @@ module.exports = class HotRemount extends Plugin {
     };
   }
 
-  get watch () {
-    const { settings, notice } = this;
-    const plugins = settings.get('plugins', []);
+  startWatch (id) {
+    const plugin = powercord.pluginManager.plugins.get(id);
+    const watcher = watch(plugin.entityPath, { recursive: true }, global._.debounce(() => {
+      powercord.pluginManager.remount(id);
+    }, 350));
 
-    return {
-      start (id) {
-        const plugin = powercord.pluginManager.plugins.get(id);
-        const watcher = watch(plugin.entityPath, { recursive: true }, global._.debounce(() => {
-          powercord.pluginManager.remount(id);
-        }, 250));
+    this.notice(id, plugin.manifest.name, () => {
+      const plugins = this.settings.get('plugins', []);
 
-        settings.set('plugins', [ ...plugins, id ]);
-        notice(id, plugin.manifest.name, () => this.stop(id, watcher));
-      },
-      stop (id, watcher) {
-        watcher.close();
-        plugins.splice(plugins.indexOf(id), 1);
-        settings.set('plugins', plugins);
-      }
-    };
+      plugins.splice(plugins.indexOf(id), 1);
+      this.settings.set('plugins', plugins);
+      watcher.close();
+    });
   }
 
   notice (id, name, onClick) {
